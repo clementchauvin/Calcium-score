@@ -150,16 +150,6 @@ def verifier_crop(volume_original, volume_isole):
     plt.tight_layout()
     plt.show()
 
-# --- Test ---
-# volume_complet = charger_volume_patient("chemin/patient")
-# volume_coeur = isoler_zone_coeur(volume_complet)
-# verifier_crop(volume_complet, volume_coeur)
-
-
-# -
-
-verifier_crop(charger_volume_patient("P59"), volume_cadre_33)
-
 
 
 
