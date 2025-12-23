@@ -7,7 +7,7 @@ import pandas as pd
 import matplotlib.pyplot as plt
 
 
-# +
+#DATA FORMATING
 def charger_volume_patient(dossier_patient):
     """
     Charge tous les fichiers DICOM d'un dossier et les assemble en 3D.
@@ -30,12 +30,6 @@ def charger_volume_patient(dossier_patient):
     
     # Transformer en array NumPy (Profondeur, Hauteur, Largeur)
     return np.array(volume)
-
-# --- Exemple d'utilisation ---
-# chemin_patient = "data/patient_001"
-# volume_3d = charger_volume_patient(chemin_patient)
-# print(f"Forme du volume : {volume_3d.shape}") 
-# Résultat attendu : (60, 512, 512)
 
 
 # +
@@ -73,7 +67,7 @@ def isoler_zone_coeur(volume_3d, taille_crop=256):
 
 # -
 
-#Toutes les images n(ont pas le meme nombre de pixels do,nc marche pas
+#Toutes les images n'ont pas le meme nombre de pixels donc marche pas
 def smart_crop_coeur(ds, volume, taille_mm=(170,120)):
     """
     ds : l'objet pydicom d'une des coupes (pour avoir les métadonnées)
@@ -124,8 +118,6 @@ def smart_crop_coeur(ds, volume, taille_mm=(170,120)):
     
     return volume_final
 
-
-volume_cadre_33 = smart_crop_coeur(pydicom.dcmread("P59_1.dcm"), charger_volume_patient("P59"))
 
 
 # +
@@ -214,7 +206,7 @@ def preparer_et_cadrer_patient(chemin_dossier):
     volume_cadre = isoler_zone_coeur(volume_3d)
 
 # +
-# --- La Boucle Principale ---
+#  La Boucle Principale 
 
 dossier_source = "Patients" # Le dossier contenant P1, P2...
 dossier_destination = "data_prete"
@@ -276,7 +268,7 @@ print("\nTraitement terminé ! Toutes vos images sont cadrées et prêtes.")
 
 # +
 
-# --- CONFIGURATION ---
+#  Preparation des entrees et des resultats attendus normalisés
 dossier_npy = "/Users/locchauvinc/cours-info/data_prete/"
 fichier_excel = "scores.xlsx"
 
@@ -305,11 +297,10 @@ for index, row in df.iterrows():
         # 2. On utilise 'total' qui est le nom de ta colonne Excel
         y_liste.append(row['total']) 
     else:
-        # Debug : on affiche pourquoi ça ne marche pas pour les premiers
-        if index < 5:
-            print(f"❌ Introuvable : {nom_fichier}")
+        # Debug : on affiche les dossiers non trouvés
+        print(f" Introuvable : {nom_fichier}")
 
-# --- FINALISATION ---
+#  FINALISATION 
 if len(y_liste) > 0:
     # Diagnostic rapide
     tailles_uniques = set([vol.shape[0] for vol in X_liste])
@@ -323,10 +314,18 @@ if len(y_liste) > 0:
     score_max = y.max()
     y_norm = y / (score_max if score_max != 0 else 1)
     
-    print(f"✅ Succès ! {len(X)} patients chargés.")
+    print(f" Succès ! {len(X)} patients chargés.")
     print(f"Taille de X : {X.shape}")
-else:
-    print("⚠️ Toujours aucun fichier trouvé. Vérifie si tes fichiers .npy sont bien nommés '1.npy', '2.npy', etc.")
+
+
+#END OF DATA FORMATING
+
+
+
+
+
+
+#NEAURAL NETWORK
 
 
 # +
@@ -342,15 +341,17 @@ def hidden(X, W1, b1):
     return relu(np.dot(W1, X) + b1)
 
 def output(h, W2, b2):
-    return relu(np.dot(W2.T, h) + b2)
+    return(np.dot(W2.T, h) + b2)
+
+
 # +
-# --- PARAMÈTRES ---
+#  PARAMÈTRES 
 input_size = X.shape[1] # ex: 1 296 000
 hidden_size = 64        # Nombre de neurones dans la couche cachée
 learning_rate = 1e-7    # Très petit pour éviter les erreurs 'NaN'
 epochs = 100            # Nombre de passages sur tout le dataset
 
-# --- INITIALISATION DES POIDS ---
+#  INITIALISATION DES POIDS 
 # He Initialization : on ne met pas de zéros sinon le réseau n'apprend rien
 W1 = np.random.randn(input_size, hidden_size) * np.sqrt(2. / input_size)
 b1 = np.zeros((1, hidden_size))
@@ -367,7 +368,7 @@ for epoch in range(epochs):
     np.random.shuffle(indices)
     
     for i in indices:
-        # --- 1. FORWARD PASS (Prédiction) ---
+        #  1. FORWARD PASS (Prédiction) 
         xi = X[i:i+1] # Un seul patient (1, pixels)
         yi = y_norm[i:i+1]
         
@@ -382,7 +383,7 @@ for epoch in range(epochs):
         loss = (prediction - yi)**2
         epoch_loss += loss[0][0]
         
-        # --- 2. BACKWARD PASS (Calcul de la correction) ---
+        #  2. BACKWARD PASS (Calcul de la correction)---
         # Dérivée par rapport à la sortie
         d_prediction = 2 * (prediction - yi)
         
@@ -398,7 +399,7 @@ for epoch in range(epochs):
         dW1 = np.dot(xi.T, dz1)
         db1 = dz1
         
-        # --- 3. MISE À JOUR DES POIDS ---
+        # 3. MISE À JOUR DES POIDS 
         W1 -= learning_rate * dW1
         b1 -= learning_rate * db1
         W2 -= learning_rate * dW2
