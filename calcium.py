@@ -225,10 +225,10 @@ def output(h, W2, b2):
 
 
 #  HYPERPARAMETERS 
-input_size = X.shape[1] # ex: 1 296 000
-hidden_size = 64        # Number of neurones in the hidden layer
+input_size = X.shape[1] 
+hidden_size = 64        
 learning_rate = 0.0001    
-epochs = 50            # Nombre de passages sur tout le dataset
+epochs = 50            
 
 #  INITIALISATION of weights and biases (PARAMETERS)
 
