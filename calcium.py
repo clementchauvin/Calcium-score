@@ -230,7 +230,7 @@ hidden_size = 64
 learning_rate = 0.0001    
 epochs = 50            
 
-#  INITIALISATION of weights and biases (PARAMETERS)
+#  INITIALISATION of weights and biases 
 
 W1 = np.random.randn(input_size, hidden_size) * np.sqrt(2. / input_size)
 b1 = np.zeros((1, hidden_size))
@@ -248,7 +248,7 @@ for epoch in range(epochs):
     
     for i in indices:
         #  1. FORWARD  
-        xi = X[i:i+1] # Un seul patient (1, pixels)
+        xi = X[i:i+1] 
         yi = y_norm[i:i+1]
         
         # hidden layer
